@@ -1,6 +1,3 @@
-//go:build !js
-// +build !js
-
 package main
 
 import (
@@ -10,17 +7,14 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/signal"
 	"runtime"
-	"syscall"
 
 	"github.com/anaseto/gruid"
-)
 
-const (
-	LogLines  = 2
-	MapWidth  = UIWidth
-	MapHeight = UIHeight - 1 - LogLines
+	. "github.com/lecoqjacob/rrouge/constants"
+	"github.com/lecoqjacob/rrouge/game"
+	"github.com/lecoqjacob/rrouge/palette"
+	"github.com/lecoqjacob/rrouge/tiles"
 )
 
 func main() {
@@ -40,7 +34,7 @@ func main() {
 	flag.Parse()
 
 	if *optVersion {
-		fmt.Println(Version)
+		fmt.Println(game.Version)
 		os.Exit(0)
 	}
 
@@ -48,31 +42,26 @@ func main() {
 		Xterm256Color = true
 	} else {
 		Xterm256Color = false
-		Only8Colors = true
+		palette.Only8Colors = true
 	}
 
 	if *opt256colors {
 		Xterm256Color = true
-		Only8Colors = false
+		palette.Only8Colors = false
 	} else if *opt16colors {
 		Xterm256Color = false
-		Only8Colors = false
+		palette.Only8Colors = false
 	}
 
-	err := initConfig()
-	if err != nil {
-		log.Print(err)
-	}
-
-	applyThemeConf()
-	initDriver(*optFullscreen)
-
+	tiles.InitDriver(*optFullscreen)
 	RunGame(*optLogFile)
 }
 
 func RunGame(logfile string) {
-	grid := gruid.NewGrid(UIWidth, UIHeight)
-	m := &model{grid: grid, game: &game{}}
+	// Create a new grid with standard 80x24 size.
+	gd := gruid.NewGrid(UIWidth, UIHeight)
+
+	m := &game.Model{Grid: gd, Game: &game.Game{}}
 
 	if logfile != "" {
 		f, err := os.OpenFile(logfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
@@ -85,34 +74,21 @@ func RunGame(logfile string) {
 		}
 	}
 
-	if !Tiles && !LogGame {
+	if !tiles.Tiles && !LogGame {
 		log.SetOutput(ioutil.Discard)
 	}
 
 	app := gruid.NewApp(gruid.AppConfig{
-		Driver: driver,
 		Model:  m,
+		Driver: tiles.Driver,
 	})
 
 	err := app.Start(context.Background())
-	if !Tiles && !LogGame {
+	if !tiles.Tiles && !LogGame {
 		log.SetOutput(os.Stderr)
 	}
 
 	if err != nil {
 		log.Fatal(err)
-	}
-}
-
-func subSig(ctx context.Context, msgs chan<- gruid.Msg) {
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
-
-	defer signal.Stop(sig)
-
-	select {
-	case <-ctx.Done():
-	case <-sig:
-		msgs <- gruid.MsgQuit{}
 	}
 }

@@ -1,7 +1,4 @@
-//go:build sdl || js
-// +build sdl js
-
-package main
+package tiles
 
 import (
 	"image"
@@ -11,6 +8,8 @@ import (
 	"github.com/anaseto/gruid/tiles"
 	"golang.org/x/image/font/gofont/gomono"
 	"golang.org/x/image/font/opentype"
+
+	"github.com/lecoqjacob/rrouge/palette"
 )
 
 const Tiles = true
@@ -38,37 +37,19 @@ func (t *TileDrawer) GetImage(c gruid.Cell) image.Image {
 	fg := image.NewUniform(color.RGBA{0xad, 0xbc, 0xbc, 255})
 	bg := image.NewUniform(color.RGBA{0x10, 0x3c, 0x48, 255})
 
-	bgc := ColorToRGBA(c.Style.Bg, false)
-	fgc := ColorToRGBA(c.Style.Fg, true)
-	if c.Style.Attrs&AttrReverse != 0 {
-		fgc, bgc = bgc, fgc
+	// We define non default-colors (for FOV, ...).
+	switch c.Style.Bg {
+	case palette.ColorFOV:
+		bg = image.NewUniform(color.RGBA{0x18, 0x49, 0x56, 255})
 	}
 
-	// switch c.Style.Fg {
-	// case ColorPlayer, ColorLogItemUse:
-	// 	fg = image.NewUniform(color.RGBA{0x46, 0x95, 0xf7, 255})
-	// case ColorMonster:
-	// 	fg = image.NewUniform(color.RGBA{0xfa, 0x57, 0x50, 255})
-	// case ColorFOV:
-	// 	fg = image.NewUniform(color.RGBA{0xdb, 0xb3, 0x2d, 255})
-	// case ColorLogPlayerAttack, ColorStatusHealthy:
-	// 	fg = image.NewUniform(color.RGBA{0x75, 0xb9, 0x38, 255})
-	// case ColorLogMonsterAttack, ColorStatusWounded:
-	// 	fg = image.NewUniform(color.RGBA{0xed, 0x86, 0x49, 255})
-	// case ColorLogSpecial:
-	// 	fg = image.NewUniform(color.RGBA{0xf2, 0x75, 0xbe, 255})
-	// case ColorConsumable:
-	// 	fg = image.NewUniform(color.RGBA{0xdb, 0xb3, 0x2d, 255})
-	// }
-
-	// if c.Style.Attrs&AttrReverse != 0 {
-	// 	fg, bg = bg, fg
-	// }
-
-	// switch c.Style.Bg {
-	// case ColorDark:
-	// 	bg = image.NewUniform(color.RGBA{0x10, 0x3c, 0x48, 255})
-	// }
+	switch c.Style.Fg {
+	case palette.ColorPlayer:
+		fg = image.NewUniform(color.RGBA{0x46, 0x95, 0xf7, 255})
+	}
+	if c.Style.Attrs&palette.AttrReverse != 0 {
+		fg, bg = bg, fg
+	}
 
 	// We return an image with the given rune drawn using the previously
 	// defined foreground and background colors.
@@ -80,13 +61,11 @@ func (t *TileDrawer) GetImage(c gruid.Cell) image.Image {
 func GetTileDrawer() (*TileDrawer, error) {
 	t := &TileDrawer{}
 	var err error
-
 	// We get a monospace font TTF.
 	font, err := opentype.Parse(gomono.TTF)
 	if err != nil {
 		return nil, err
 	}
-
 	// We retrieve a font face.
 	face, err := opentype.NewFace(font, &opentype.FaceOptions{
 		Size: 24,
@@ -95,7 +74,6 @@ func GetTileDrawer() (*TileDrawer, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	// We create a new drawer for tiles using the previous face. Note that
 	// if more than one face is wanted (such as an italic or bold variant),
 	// you would have to create drawers for thoses faces too, and then use
@@ -104,6 +82,5 @@ func GetTileDrawer() (*TileDrawer, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return t, nil
 }
