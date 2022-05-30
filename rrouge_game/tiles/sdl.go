@@ -5,7 +5,8 @@ import (
 
 	"github.com/anaseto/gruid"
 	sdl "github.com/anaseto/gruid-sdl"
-	"github.com/lecoqjacob/rrouge/constants"
+
+	"github.com/lecoqjacob/rrouge/rrouge_game/constants"
 )
 
 var Driver gruid.Driver

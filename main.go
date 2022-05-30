@@ -11,10 +11,11 @@ import (
 
 	"github.com/anaseto/gruid"
 
-	. "github.com/lecoqjacob/rrouge/constants"
-	"github.com/lecoqjacob/rrouge/game"
-	"github.com/lecoqjacob/rrouge/palette"
-	"github.com/lecoqjacob/rrouge/tiles"
+	. "github.com/lecoqjacob/rrouge/rrouge_game/constants"
+	"github.com/lecoqjacob/rrouge/rrouge_game/game"
+	"github.com/lecoqjacob/rrouge/rrouge_game/gamestate"
+	"github.com/lecoqjacob/rrouge/rrouge_game/palette"
+	"github.com/lecoqjacob/rrouge/rrouge_game/tiles"
 )
 
 func main() {
@@ -61,7 +62,8 @@ func RunGame(logfile string) {
 	// Create a new grid with standard 80x24 size.
 	gd := gruid.NewGrid(UIWidth, UIHeight)
 
-	m := &game.Model{Grid: gd, Game: &game.Game{}}
+	// m := &game.Model{Grid: gd, Game: &game.Game{}}
+	gs := &gamestate.GameState{Grid: gd, Game: &game.Game{}}
 
 	if logfile != "" {
 		f, err := os.OpenFile(logfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
@@ -79,7 +81,7 @@ func RunGame(logfile string) {
 	}
 
 	app := gruid.NewApp(gruid.AppConfig{
-		Model:  m,
+		Model:  gs,
 		Driver: tiles.Driver,
 	})
 

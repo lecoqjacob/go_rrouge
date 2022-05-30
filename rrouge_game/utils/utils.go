@@ -2,13 +2,13 @@ package utils
 
 import (
 	"github.com/anaseto/gruid"
-	"github.com/lecoqjacob/rrouge/dungeon"
 )
 
 func Max(x, y int) int {
 	if x > y {
 		return x
 	}
+
 	return y
 }
 
@@ -16,6 +16,7 @@ func Min(x, y int) int {
 	if x < y {
 		return x
 	}
+
 	return y
 }
 
@@ -37,12 +38,6 @@ func Abs(x int) int {
 func Distance(p, q gruid.Point) int {
 	p = p.Sub(q)
 	return Abs(p.X) + Abs(p.Y)
-}
-
-func VisionRange(p gruid.Point, radius int) gruid.Range {
-	drg := gruid.NewRange(0, 0, dungeon.DungeonWidth, dungeon.DungeonHeight)
-	delta := gruid.Point{X: radius, Y: radius}
-	return drg.Intersect(gruid.Range{Min: p.Sub(delta), Max: p.Add(delta).Shift(1, 1)})
 }
 
 func KeyToDir(key gruid.Key) (p gruid.Point) {
