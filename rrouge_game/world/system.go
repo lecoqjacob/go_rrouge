@@ -5,14 +5,16 @@ import (
 )
 
 // Higher Priority means the system is executed sooner
+type Bits uint8
 
 const (
-	Priority_AI       = 10
-	Priority_Movement = 5
-	Priority_Indexing = 0
-	Priority_FOV      = 0
-	Priority_EndTurn  = 0
-	Priority_Render   = -1 // Last System to Run
+	Priority_Render = -1 // Last System to Run
+	Priority_Damage = iota
+	Priority_MeleeCombat
+	Priority_Indexing
+	Priority_Movement
+	Priority_AI
+	Priority_FOV
 )
 
 func (w *World) AddSystem(system ecs.System) {

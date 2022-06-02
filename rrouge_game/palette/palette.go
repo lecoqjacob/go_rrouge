@@ -12,18 +12,19 @@ import (
 // assumed by default, but it can be changed in configuration.
 const (
 	ColorBackground          gruid.Color = gruid.ColorDefault // background
-	ColorBackgroundSecondary gruid.Color = 1 + 0              // black
 	ColorForeground          gruid.Color = gruid.ColorDefault
-	ColorForegroundSecondary gruid.Color = 1 + 7  // white
-	ColorForegroundEmph      gruid.Color = 1 + 15 // bright white
-	ColorYellow              gruid.Color = 1 + 3
+	ColorBackgroundSecondary gruid.Color = 1 + 0 // black
 	ColorOrange              gruid.Color = 1 + 1 // red
-	ColorRed                 gruid.Color = 1 + 9 // bright red
-	ColorMagenta             gruid.Color = 1 + 5
-	ColorViolet              gruid.Color = 1 + 12 // bright blue
-	ColorBlue                gruid.Color = 1 + 4
-	ColorCyan                gruid.Color = 1 + 6
 	ColorGreen               gruid.Color = 1 + 2
+	ColorYellow              gruid.Color = 1 + 3
+	ColorBlue                gruid.Color = 1 + 4
+	ColorMagenta             gruid.Color = 1 + 5
+	ColorCyan                gruid.Color = 1 + 6
+	ColorForegroundSecondary gruid.Color = 1 + 7  // white
+	ColorRed                 gruid.Color = 1 + 9  // bright red
+	ColorViolet              gruid.Color = 1 + 12 // bright blue
+	ColorSilver              gruid.Color = 1 + 13
+	ColorForegroundEmph      gruid.Color = 1 + 15 // bright white
 )
 
 // Color definitions. For now, we use a special color for FOV. We start from 1,
@@ -40,7 +41,8 @@ var (
 
 	ColorPlayer,
 	ColorMonster,
-	ColorFOV gruid.Color
+	ColorFOV,
+	ColorDead gruid.Color
 	// ColorFOV,
 	// ColorLogPlayerAttack,
 	// ColorLogItemUse,
@@ -63,6 +65,7 @@ func init() {
 	ColorPlayer = ColorYellow
 	ColorMonster = ColorRed
 	ColorFOV = ColorForegroundEmph
+	ColorDead = ColorSilver
 }
 
 func ColorToRGBA(c gruid.Color, fg bool) color.Color {
@@ -90,6 +93,8 @@ func ColorToRGBA(c gruid.Color, fg bool) color.Color {
 		cl = color.RGBA{88, 110, 117, opaque}
 	case ColorForegroundSecondary:
 		cl = color.RGBA{147, 161, 161, opaque}
+	case ColorSilver:
+		cl = color.RGBA{192, 192, 192, opaque}
 	default:
 		cl = color.RGBA{253, 246, 227, opaque}
 		if fg {

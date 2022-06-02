@@ -10,22 +10,12 @@ import (
 	"github.com/lecoqjacob/rrouge/rrouge_game/world"
 )
 
-func visionRange(p gruid.Point, radius int) gruid.Range {
-	drg := gruid.NewRange(0, 0, dungeon.DungeonWidth, dungeon.DungeonHeight)
-	delta := gruid.Point{X: radius, Y: radius}
-	return drg.Intersect(gruid.Range{Min: p.Sub(delta), Max: p.Add(delta).Shift(1, 1)})
-}
-
 type ComputeFOVSystem struct {
 	G *game.Game
 }
 
 func (fov_s *ComputeFOVSystem) Components() []ecs.ComponentType {
 	return []ecs.ComponentType{world.ComponentTypes.Position, world.ComponentTypes.FOV}
-}
-
-// Dummy tag
-func (fov_s *ComputeFOVSystem) Remove(basic *ecs.Entity) {
 }
 
 func (*ComputeFOVSystem) Priority() int { return world.Priority_FOV }
@@ -64,4 +54,14 @@ func (fov_s *ComputeFOVSystem) Update(entities ecs.EntityList, dt float32) {
 			}
 		}
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Utilities
+////////////////////////////////////////////////////////////////////////////////
+
+func visionRange(p gruid.Point, radius int) gruid.Range {
+	drg := gruid.NewRange(0, 0, dungeon.DungeonWidth, dungeon.DungeonHeight)
+	delta := gruid.Point{X: radius, Y: radius}
+	return drg.Intersect(gruid.Range{Min: p.Sub(delta), Max: p.Add(delta).Shift(1, 1)})
 }

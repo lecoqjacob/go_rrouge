@@ -5,6 +5,7 @@ import (
 	"github.com/lecoqjacob/rrouge/ecs"
 	"github.com/lecoqjacob/rrouge/rrouge_game/game"
 	"github.com/lecoqjacob/rrouge/rrouge_game/systems"
+	"github.com/lecoqjacob/rrouge/rrouge_game/turnstate"
 	"github.com/lecoqjacob/rrouge/rrouge_game/utils"
 )
 
@@ -29,15 +30,20 @@ func (gs *GameState) NewGameState() gruid.Effect {
 
 	// Add systems to the world
 	gs.Game.World.AddSystems([]ecs.System{
-		&systems.MovementSystem{G: g, W: w},
 		&systems.RenderSystem{G: g},
+		&systems.MovementSystem{G: g, W: w},
 		&systems.ComputeFOVSystem{G: g},
-		&systems.EndTurnSystem{G: g},
-		&systems.MaxIndexingSystem{Dgen: dgen},
+		&systems.MaxIndexingSystem{W: w, Dgen: dgen},
 		&systems.AISystem{G: g, W: w, Dgen: dgen},
+		&systems.DamageSystem{W: w},
+		&systems.MeleeCombatSystem{W: w},
 	})
 
 	systems.RenderDebugMap(gs.Game, gs.Grid)
+
+	// PreRun Systems
+	gs.Game.World.Update(Time.Delta())
+
 	return nil
 }
 
@@ -57,7 +63,18 @@ func (gs *GameState) Update(msg gruid.Msg) gruid.Effect {
 		return gruid.End()
 	}
 
+	// Handle State Machine
+	if msg, ok := msg.(msgTurnState); ok {
+		// Update systems
+		gs.Game.World.Update(Time.Delta())
+
+		// Progress to next state
+		gs.Game.TurnState = turnstate.TurnState(msg)
+	}
+
+	var eff gruid.Effect
 	gs.Action = Action{} // reset last action information
+
 	switch msg := msg.(type) {
 	case gruid.MsgKeyDown:
 		// Update action information on key down.
@@ -65,10 +82,12 @@ func (gs *GameState) Update(msg gruid.Msg) gruid.Effect {
 	}
 
 	// Handle action (if any).
-	eff := gs.handleAction()
+	eff = gs.handleAction()
+	cmd := gs.turnStateCmd()
 
-	// Update Systems
-	gs.Game.World.Update(Time.Delta())
+	if cmd != nil {
+		return gruid.Batch(eff, cmd)
+	}
 
 	return eff
 }
@@ -88,4 +107,16 @@ func (gs *GameState) updateMsgKeyDown(msg gruid.MsgKeyDown) {
 // grid.
 func (gs *GameState) Draw() gruid.Grid {
 	return systems.GetRenderables(gs.Grid)
+}
+
+type msgTurnState turnstate.TurnState
+
+func (gs *GameState) turnStateCmd() gruid.Cmd {
+	if gs.Game.TurnState == turnstate.AwaitingInput {
+		return nil
+	}
+
+	return func() gruid.Msg {
+		return msgTurnState(gs.Game.TurnState.NextState())
+	}
 }

@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"time"
 
+	"golang.org/x/exp/maps"
+
 	"github.com/anaseto/gruid"
 	"github.com/anaseto/gruid/paths"
 	"github.com/anaseto/gruid/rl"
@@ -14,8 +16,8 @@ import (
 )
 
 const (
-	DungeonHeight = 21
 	DungeonWidth  = 80
+	DungeonHeight = 21
 	DungeonNCells = DungeonWidth * DungeonHeight
 )
 
@@ -31,10 +33,9 @@ type Dungeon struct {
 	Rand  *random.Rand     // random number generator
 	PR    *paths.PathRange // path finding in the grid range
 
-	Tile_content []*ecs.Entity
 	Explored     map[gruid.Point]bool // explored cells
-	Blocked      map[gruid.Point]bool // explored cells
-
+	Blocked      map[gruid.Point]bool // blocked cells
+	Cell_Content map[gruid.Point][]*ecs.Entity
 }
 
 func NewDungeon() *Dungeon {
@@ -45,8 +46,9 @@ func NewDungeon() *Dungeon {
 		Rand: random.New(rand.NewSource(time.Now().UnixNano())),
 		PR:   paths.NewPathRange(grid.Bounds()),
 
-		Explored: make(map[gruid.Point]bool),
-		Blocked:  make(map[gruid.Point]bool),
+		Explored:     make(map[gruid.Point]bool),
+		Blocked:      make(map[gruid.Point]bool),
+		Cell_Content: make(map[gruid.Point][]*ecs.Entity),
 	}
 
 	return dgen.Generate()
@@ -140,18 +142,14 @@ func (dgen *Dungeon) RandomFloor() gruid.Point {
 	}
 }
 
-// RandomFloor returns a random floor cell in the map. It assumes that such a
-// floor cell exists (otherwise the function does not end).
 func (dgen *Dungeon) Populate_Blocked() {
 	dgen.Grid.Iter(func(p gruid.Point, c rl.Cell) {
-		if c == WallCell {
-			dgen.Blocked[p] = true
-		}
+		dgen.Blocked[p] = c == WallCell
 	})
 }
 
-func (dgen *Dungeon) NoBlockingEntityAt(p gruid.Point) bool {
-	return !dgen.Blocked[p]
+func (dgen *Dungeon) Clear_Content_Index() {
+	maps.Clear(dgen.Cell_Content)
 }
 
 // NewMap returns a new map with given size.

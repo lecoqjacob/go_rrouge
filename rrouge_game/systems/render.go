@@ -20,11 +20,7 @@ func (rs *RenderSystem) Components() []ecs.ComponentType {
 	return []ecs.ComponentType{world.ComponentTypes.Position, world.ComponentTypes.Style}
 }
 
-// Dummy tag
-func (rs *RenderSystem) Remove(basic *ecs.Entity) {
-}
-
-func (*RenderSystem) Priority() int { return world.Priority_Movement }
+func (*RenderSystem) Priority() int { return world.Priority_Render }
 
 var grid gruid.Grid
 
@@ -32,7 +28,7 @@ func (rs *RenderSystem) Update(entities ecs.EntityList, dt float32) {
 	grid.Fill(gruid.Cell{Rune: ' '})
 
 	renderMap(rs.G, grid)
-	renderEntities(rs.G, grid)
+	renderEntities(rs.G, entities, grid)
 }
 
 func GetRenderables(mdg gruid.Grid) gruid.Grid {
@@ -77,7 +73,7 @@ func renderMap(g *game.Game, mgd gruid.Grid) {
 		}
 
 		c := gruid.Cell{Rune: g.Dgen.Rune(it.Cell())}
-		if g.World.InFOV(g.World.Player, it.P()) {
+		if g.World.IsInFOV(g.World.Player, it.P()) {
 			c.Style.Bg = palette.ColorFOV
 		}
 
@@ -85,13 +81,11 @@ func renderMap(g *game.Game, mgd gruid.Grid) {
 	}
 }
 
-func renderEntities(g *game.Game, mgd gruid.Grid) {
-	entities := g.World.GetEntities(world.ComponentTypes.Position, world.ComponentTypes.Style)
-
+func renderEntities(g *game.Game, entities ecs.EntityList, mgd gruid.Grid) {
 	for _, entity := range entities {
 		p := g.World.GetPosition(entity)
 
-		if !g.Dgen.Explored[p] || !g.World.InFOV(g.World.Player, p) {
+		if !g.Dgen.Explored[p] || !g.World.IsInFOV(g.World.Player, p) {
 			continue
 		}
 

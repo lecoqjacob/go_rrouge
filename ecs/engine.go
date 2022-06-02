@@ -47,12 +47,12 @@ func (engine *Engine) CreateEntity() *Entity {
 func (engine *Engine) DestroyEntity(entity *Entity) {
 	// Remove all components to trigger possible actions
 	for k := range entity.Components {
-		entity.RemoveComponent(k)
+		entity.removeComponent(k)
 	}
 	engine.Entities = engine.Entities.RemoveEntity(entity)
 
 	entity.Components = nil
-	entity.Engine = nil
+	entity.engine = nil
 	entity = nil
 }
 
@@ -88,9 +88,9 @@ func (entityList EntityList) GetEntitiesWithFilter(fn func(*Entity) bool) Entity
 }
 
 // Only one Entity expected, nil if not
-func (entityList EntityList) GetEntity(search_entity *Entity) *Entity {
+func (entityList EntityList) Get(search_entity *Entity) *Entity {
 	for _, entity := range entityList {
-		if entity.Id == search_entity.Id {
+		if entity.ID() == search_entity.ID() {
 			return entity
 		}
 	}
@@ -101,7 +101,7 @@ func (entityList EntityList) GetEntity(search_entity *Entity) *Entity {
 func (entityList *EntityList) RemoveEntity(entity *Entity) EntityList {
 	old := *entityList
 	for i, e := range old {
-		if e.Id == entity.Id {
+		if e.ID() == entity.ID() {
 			return append(old[:i], old[i+1:]...)
 		}
 	}
@@ -110,6 +110,12 @@ func (entityList *EntityList) RemoveEntity(entity *Entity) EntityList {
 
 func (entityList EntityList) Concat(other EntityList) EntityList {
 	return append(entityList, other...)
+}
+
+func (entityList EntityList) ClearComponents(cmpTypes ...ComponentType) {
+	for _, entity := range entityList {
+		entity.RemoveComponents(cmpTypes...)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

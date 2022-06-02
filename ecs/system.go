@@ -8,7 +8,7 @@ type System interface {
 	Update(entities EntityList, dt float32)
 
 	// Remove removes the given entity from the system.
-	Remove(e *Entity)
+	// Remove(e *Entity)
 }
 
 type SystemComponents interface {

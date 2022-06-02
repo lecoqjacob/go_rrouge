@@ -23,7 +23,8 @@ func (aip *AiPath) Neighbors(q gruid.Point) []gruid.Point {
 
 // Cost implements paths.Astar.Cost.
 func (aip *AiPath) Cost(p, q gruid.Point) int {
-	if !aip.Dgen.NoBlockingEntityAt(q) {
+	// if !aip.World.NoBlockingEntityAt(q) {
+	if !aip.Dgen.Blocked[q] {
 		// Extra cost for blocked positions: this encourages the
 		// pathfinding algorithm to take another path to reach the
 		// player.

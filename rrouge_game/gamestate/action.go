@@ -24,15 +24,15 @@ func (gs *GameState) handleAction() gruid.Effect {
 	switch gs.Action.Type {
 	case ActionBump:
 		gs.Bump(gs.Action.Delta)
+		gs.Game.EndPlayerTurn()
 	case ActionWait:
-		// systems.EndTurn(gs.Game)
+		// wait
+		gs.Game.EndPlayerTurn()
 	case ActionQuit:
 		// for now, just terminate with gruid End command: this will
 		// have to be updated later when implementing saving.
 		return gruid.End()
 	}
-
-	gs.Game.IsPlayerTurn = false
 
 	return nil
 }
@@ -42,5 +42,12 @@ func (gs *GameState) handleAction() gruid.Effect {
 func (gs *GameState) Bump(delta gruid.Point) {
 	w := gs.Game.World
 	to := w.GetPosition(w.Player).Add(delta)
+
+	// Check if there is a target at new position
+	if target, found := w.IsTargetAt(to); found {
+		w.ApplyMelee(w.Player, target)
+		return
+	}
+
 	w.ApplyMovement(w.Player, to)
 }

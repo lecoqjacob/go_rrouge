@@ -2,12 +2,10 @@ package constants
 
 const GameName = "rrouge"
 
-// maxLOS is the maximum distance in player's field of view.
-const MaxLOS = 10
-
 const (
-	UIWidth  = 80
-	UIHeight = 24
+	UI_WIDTH  = 80
+	UI_HEIGHT = 24
+	UI_COUNT  = UI_WIDTH * UI_HEIGHT
 )
 
 var (

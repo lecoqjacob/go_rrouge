@@ -15,10 +15,6 @@ func (ms *MovementSystem) Components() []ecs.ComponentType {
 	return []ecs.ComponentType{world.ComponentTypes.Move}
 }
 
-// Dummy tag
-func (ms *MovementSystem) Remove(basic *ecs.Entity) {
-}
-
 func (*MovementSystem) Priority() int { return world.Priority_Movement }
 
 func (ms *MovementSystem) Update(entities ecs.EntityList, dt float32) {
@@ -26,21 +22,22 @@ func (ms *MovementSystem) Update(entities ecs.EntityList, dt float32) {
 
 	for _, entity := range entities {
 		move := entity.GetComponent(world.ComponentTypes.Move).(world.MoveComponent)
-		entity.RemoveComponent(world.ComponentTypes.Move)
 
-		newPosition := world.PositionComponent{Point: move.To}
-		if !g.Dgen.Walkable(newPosition.Point) {
+		np := move.To
+		if !g.Dgen.Walkable(np) || g.Dgen.Blocked[np] { // !g.World.NoBlockingEntityAt(np.Point)
 			continue
 		}
 
 		// Update POS
-		g.World.ApplyPosition(entity, move.To)
+		g.World.ApplyPosition(entity, np)
+		g.Dgen.Blocked[np] = true
 
 		// Update FOV, if applicable
-		fov, ok := entity.GetComponent(world.ComponentTypes.FOV).(world.FovComponent)
-		if ok {
+		if fov, ok := entity.GetComponent(world.ComponentTypes.FOV).(world.FovComponent); ok {
 			fov.Dirty = true
 			entity.InsertComponent(fov)
 		}
 	}
+
+	entities.ClearComponents(world.ComponentTypes.Move)
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/lecoqjacob/rrouge/rrouge_game/dungeon"
 	"github.com/lecoqjacob/rrouge/rrouge_game/random"
+	"github.com/lecoqjacob/rrouge/rrouge_game/turnstate"
 	"github.com/lecoqjacob/rrouge/rrouge_game/world"
 )
 
@@ -16,7 +17,8 @@ type Game struct {
 	Dgen  *dungeon.Dungeon
 	Rng   *random.Rand
 
-	IsPlayerTurn bool
+	TurnState turnstate.TurnState
+	Log       []LogEntry // log entries
 }
 
 func InitializeGame() *Game {
@@ -30,7 +32,7 @@ func InitializeGame() *Game {
 	w.NewPlayer(dgen.Rooms[0].Center())
 
 	rng := random.New(rand.NewSource(time.Now().UnixNano()))
-	for _, room := range dgen.Rooms[1:2] {
+	for _, room := range dgen.Rooms[1:3] {
 		// for _, room := range dgen.Rooms[1:] {
 		var r rune
 		var name string
@@ -46,9 +48,12 @@ func InitializeGame() *Game {
 	}
 
 	return &Game{
-		World:        w,
-		Dgen:         dgen,
-		Rng:          rng,
-		IsPlayerTurn: true,
+		World: w,
+		Dgen:  dgen,
+		Rng:   rng,
 	}
+}
+
+func (g *Game) EndPlayerTurn() {
+	g.TurnState = turnstate.PlayerTurn
 }

@@ -13,12 +13,12 @@ func PrintTerminalError(msg string, a ...interface{}) string {
 	return full_msg
 }
 
-func PrintNotFoundComponentError(entityId int, componentType ecs.ComponentType) string {
+func PrintNotFoundComponentError(entityId uint64, componentType ecs.ComponentType) string {
 	return PrintTerminalError(fmt.Sprintf("Entity %d has no [%s] component", entityId, componentType))
 }
 
 func Debug(msg string, a ...interface{}) string {
-	full_msg := fmt.Sprintf("[yellow][DEBUG]: %s", fmt.Sprintf(msg, a...))
+	full_msg := fmt.Sprintf("[yellow][DEBUG]: %s\n", fmt.Sprintf(msg, a...))
 	colorstring.Printf(full_msg)
 	return full_msg
 }

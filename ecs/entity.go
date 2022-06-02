@@ -13,10 +13,9 @@ var (
 )
 
 type Entity struct {
-	Id         int
 	id         uint64
 	Components map[ComponentType]Component
-	Engine     *Engine
+	engine     *Engine
 }
 
 // Identifier is an interface for anything that implements the basic ID() uint64,
@@ -31,12 +30,12 @@ type Identifier interface {
 type IdentifierSlice []Identifier
 
 // ID returns the unique identifier of the entity.
-func (e Entity) ID() uint64 {
+func (e *Entity) ID() uint64 {
 	return e.id
 }
 
-func (entity Entity) String() string {
-	var str = "Entity " + strconv.Itoa(entity.Id) + "["
+func (entity *Entity) String() string {
+	var str = "Entity " + strconv.FormatUint(entity.ID(), 10) + "["
 	for _, c := range entity.Components {
 		str += string(c.ComponentType()) + ","
 	}
@@ -52,7 +51,7 @@ func (entity *Entity) InsertComponent(component Component) *Entity {
 	// Call event if possible
 	cmp, ok := component.(OnAddComponent)
 	if ok {
-		cmp.OnAdd(entity.Engine, entity)
+		cmp.OnAdd(entity.engine, entity)
 	}
 
 	return entity
@@ -66,7 +65,7 @@ func (entity *Entity) InsertComponents(components ...Component) *Entity {
 	return entity
 }
 
-func (entity *Entity) RemoveComponent(componentType ComponentType) *Entity {
+func (entity *Entity) removeComponent(componentType ComponentType) *Entity {
 	component, ok := entity.Components[componentType]
 	if ok {
 		delete(entity.Components, componentType)
@@ -74,8 +73,16 @@ func (entity *Entity) RemoveComponent(componentType ComponentType) *Entity {
 		// Call event if possible
 		cmp, ok := component.(OnRemoveComponent)
 		if ok {
-			cmp.OnRemove(entity.Engine, entity)
+			cmp.OnRemove(entity.engine, entity)
 		}
+	}
+
+	return entity
+}
+
+func (entity *Entity) RemoveComponents(componentTypes ...ComponentType) *Entity {
+	for _, componentType := range componentTypes {
+		entity.removeComponent(componentType)
 	}
 
 	return entity

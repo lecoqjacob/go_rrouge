@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/anaseto/gruid"
 )
 
@@ -52,4 +55,50 @@ func KeyToDir(key gruid.Key) (p gruid.Point) {
 		p = gruid.Point{X: 1, Y: 0}
 	}
 	return p
+}
+
+func Ternary(condition bool, ifTrue, ifFalse interface{}) interface{} {
+	if condition {
+		return ifTrue
+	} else {
+		return ifFalse
+	}
+}
+
+func AppendSlice[T any](s []T, v T) []T {
+	return append(s, v)
+}
+
+func Sum(a []int) int {
+	sum := 0
+	for _, v := range a {
+		sum += v
+	}
+	return sum
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Stats
+////////////////////////////////////////////////////////////////////////////////
+
+func AddSign(i int) string {
+	if i >= 0 {
+		return "+" + strconv.Itoa(i)
+	}
+	return strconv.Itoa(i)
+}
+
+func StatStrMax(name string, value int, max int) string {
+
+	if value != 0 || max != 0 {
+		return name + " " + AddSign(value) + "/" + AddSign(max) + " "
+	}
+	return ""
+}
+
+func StatStr(name string, value int) string {
+	if value != 0 {
+		return fmt.Sprintf("%s %d ", name, value)
+	}
+	return ""
 }

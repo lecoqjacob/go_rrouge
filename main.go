@@ -60,7 +60,7 @@ func main() {
 
 func RunGame(logfile string) {
 	// Create a new grid with standard 80x24 size.
-	gd := gruid.NewGrid(UIWidth, UIHeight)
+	gd := gruid.NewGrid(UI_WIDTH, UI_HEIGHT)
 
 	// m := &game.Model{Grid: gd, Game: &game.Game{}}
 	gs := &gamestate.GameState{Grid: gd, Game: &game.Game{}}
